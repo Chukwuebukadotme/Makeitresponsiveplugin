@@ -1,0 +1,16 @@
+{
+  "name": "figma-frame-width-adjustment",
+  "version": "1.0.0",
+  "description": "Adjusts frame widths to match screen width",
+  "main": "code.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json -w"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.106.0",
+    "typescript": "^5.0.0"
+  }
+}

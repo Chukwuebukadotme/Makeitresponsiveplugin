@@ -1,0 +1,239 @@
+<style>
+  body {
+    font-family: Inter, sans-serif;
+    padding: 16px;
+    background: white;
+  }
+  
+  .dropdown-section {
+    margin-bottom: 12px;
+  }
+  
+  .dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: white;
+  }
+  
+  .dropdown-title {
+    font-size: 14px;
+    font-weight: 400;
+    color: #666;
+  }
+  
+  .dropdown-arrow {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+  }
+  
+  .dropdown-arrow.open {
+    transform: rotate(180deg);
+  }
+  
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    margin-top: 4px;
+    width: calc(100% - 32px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .dropdown-content.open {
+    display: block;
+  }
+  
+  .device-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+  }
+  
+  .device-option:hover {
+    background: #F5F7FF;
+  }
+  
+  .device-option.selected {
+    background: #F5F7FF;
+    color: #18A0FB;
+  }
+  
+  .device-option::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    background-size: contain;
+  }
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #E5E5E5;
+    border-top: 2px solid #18A0FB;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-overlay.show {
+    display: flex;
+  }
+</style>
+
+<div class="dropdown-section">
+  <div class="dropdown-header" onclick="toggleDropdown('android')">
+    <span class="dropdown-title" data-original-title="Android">Android</span>
+    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="dropdown-content" id="android-content">
+    <div class="device-option" data-width="412">Pixel (412px)</div>
+    <div class="device-option" data-width="700">Tablet (700px)</div>
+  </div>
+</div>
+
+<div class="dropdown-section">
+  <div class="dropdown-header" onclick="toggleDropdown('iphone')">
+    <span class="dropdown-title" data-original-title="iPhone">iPhone</span>
+    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="dropdown-content" id="iphone-content">
+    <div class="device-option" data-width="393">iPhone 14 (393px)</div>
+    <div class="device-option" data-width="402">iPhone 14 Pro (402px)</div>
+    <div class="device-option" data-width="440">iPhone 14 Plus (440px)</div>
+    <div class="device-option" data-width="430">iPhone 14 Pro Max (430px)</div>
+    <div class="device-option" data-width="390">iPhone 13 (390px)</div>
+    <div class="device-option" data-width="428">iPhone 13 Pro Max (428px)</div>
+    <div class="device-option" data-width="375">iPhone SE (375px)</div>
+    <div class="device-option" data-width="320">iPhone 5/SE (320px)</div>
+  </div>
+</div>
+
+<div class="dropdown-section">
+  <div class="dropdown-header" onclick="toggleDropdown('tablet')">
+    <span class="dropdown-title" data-original-title="Tablet">Tablet</span>
+    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="dropdown-content" id="tablet-content">
+    <div class="device-option" data-width="1280">iPad (1280px)</div>
+    <div class="device-option" data-width="1440">iPad Pro (1440px)</div>
+    <div class="device-option" data-width="744">iPad Mini (744px)</div>
+    <div class="device-option" data-width="834">iPad Air (834px)</div>
+    <div class="device-option" data-width="1024">iPad Pro 11" (1024px)</div>
+  </div>
+</div>
+
+<div class="dropdown-section">
+  <div class="dropdown-header" onclick="toggleDropdown('desktop')">
+    <span class="dropdown-title" data-original-title="Desktop">Desktop</span>
+    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="dropdown-content" id="desktop-content">
+    <div class="device-option" data-width="1280">Small (1280px)</div>
+    <div class="device-option" data-width="1512">Medium (1512px)</div>
+    <div class="device-option" data-width="1728">Large (1728px)</div>
+    <div class="device-option" data-width="1440">HD (1440px)</div>
+  </div>
+</div>
+
+<div class="loading-overlay">
+  <div class="loading-spinner"></div>
+</div>
+
+<script>
+let selectedOption = null;
+
+function toggleDropdown(id) {
+  const allDropdowns = document.querySelectorAll('.dropdown-content');
+  const allHeaders = document.querySelectorAll('.dropdown-header');
+  
+  allDropdowns.forEach(dropdown => {
+    if (dropdown.id !== `${id}-content`) {
+      dropdown.classList.remove('open');
+      dropdown.previousElementSibling.classList.remove('active');
+    }
+  });
+
+  const content = document.getElementById(`${id}-content`);
+  const header = content.previousElementSibling;
+  
+  content.classList.toggle('open');
+  header.classList.toggle('active');
+}
+
+document.querySelectorAll('.device-option').forEach(option => {
+  option.addEventListener('click', async () => {
+    if (selectedOption) {
+      selectedOption.classList.remove('selected');
+    }
+    option.classList.add('selected');
+    selectedOption = option;
+    
+    const width = parseInt(option.dataset.width);
+    const deviceName = option.textContent;
+    
+    // Show loading overlay
+    document.querySelector('.loading-overlay').classList.add('show');
+    
+    // Close dropdown
+    option.closest('.dropdown-content').classList.remove('open');
+    
+    // Wait for 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'adjust-width', 
+        width,
+        deviceName 
+      }
+    }, '*');
+    
+    // Hide loading overlay after message is sent
+    document.querySelector('.loading-overlay').classList.remove('show');
+  });
+});
+
+document.getElementById('cancel').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
+};
+</script>
