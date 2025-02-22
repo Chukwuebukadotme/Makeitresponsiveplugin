@@ -1,8 +1,13 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": ["es6"],
-    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"],
-    "moduleResolution": "node"
+    "lib": ["es6", "dom", "dom.iterable"],
+    "typeRoots": ["./node_modules/@figma/plugin-typings"],
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "strict": false,
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "allowJs": true
   }
 }

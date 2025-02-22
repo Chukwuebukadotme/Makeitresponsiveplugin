@@ -1,7 +1,7 @@
 <style>
   body {
     font-family: Inter, sans-serif;
-    padding: 16px;
+    padding: 48px 16px 16px 16px;
     background: white;
   }
   
@@ -110,7 +110,191 @@
   .loading-overlay.show {
     display: flex;
   }
+
+  .theme-toggle {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    z-index: 1001;
+  }
+
+  .theme-toggle-button {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+
+  .theme-toggle-button.active {
+    background: #6E56CF;
+  }
+
+  [data-theme="dark"] {
+    background: #1C1C1C;
+    color: #FFFFFF;
+  }
+
+  [data-theme="dark"] .dropdown-header {
+    background: #2C2C2C;
+    border-color: #3C3C3C;
+  }
+
+  [data-theme="dark"] .dropdown-title {
+    color: #E5E5E5;
+  }
+
+  [data-theme="dark"] .dropdown-content {
+    background: #2C2C2C;
+    border-color: #3C3C3C;
+  }
+
+  [data-theme="dark"] .device-option {
+    color: #E5E5E5;
+  }
+
+  [data-theme="dark"] .device-option:hover {
+    background: #3C3C3C;
+  }
+
+  [data-theme="dark"] #custom-width {
+    background: #2C2C2C;
+    border-color: #3C3C3C;
+    color: #E5E5E5;
+  }
+
+  [data-theme="dark"] #custom-width::placeholder {
+    color: #999;
+  }
+
+  [data-theme="dark"] .dropdown-arrow path {
+    stroke: #E5E5E5;
+  }
+
+  [data-theme="dark"] .loading-overlay {
+    background: rgba(28, 28, 28, 0.9);
+  }
+
+  .custom-width-section {
+    padding: 16px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .custom-section {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  #custom-width {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #E5E5E5;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .apply-button {
+    width: 100%;
+    background: #0D99FF;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .apply-button:hover {
+    background: #0B87E4;
+  }
+
+  .attribution {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  [data-theme="dark"] .attribution {
+    color: #999;
+  }
+
+  .attribution a {
+    color: #0D99FF;
+    text-decoration: none;
+  }
+
+  [data-theme="dark"] .attribution a {
+    color: #6E56CF;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 24px;
+    height: 14px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #E5E5E5;
+    transition: .3s;
+    border-radius: 12px;
+  }
+
+  .toggle-button {
+    position: absolute;
+    content: "";
+    height: 10px;
+    width: 10px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+
+  input:checked + .toggle-label {
+    background-color: #6E56CF;
+  }
+
+  input:checked + .toggle-label .toggle-button {
+    transform: translateX(10px);
+  }
+
+  [data-theme="dark"] .toggle-label {
+    background-color: #3C3C3C;
+  }
 </style>
+
+<div class="theme-toggle">
+  <div class="toggle-switch">
+    <input type="checkbox" id="theme-toggle" onchange="setTheme(this.checked ? 'dark' : 'light')">
+    <label for="theme-toggle" class="toggle-label">
+      <span class="toggle-button"></span>
+    </label>
+  </div>
+</div>
 
 <div class="dropdown-section">
   <div class="dropdown-header" onclick="toggleDropdown('android')">
@@ -175,9 +359,25 @@
   </div>
 </div>
 
+<div class="dropdown-section">
+  <div class="dropdown-header" onclick="toggleDropdown('custom')">
+    <span class="dropdown-title" data-original-title="Custom Width">Custom Width(px)</span>
+    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="dropdown-content" id="custom-content">
+    <div class="custom-section">
+      <input type="number" id="custom-width" placeholder="0.00" min="0" step="1">
+      <button id="apply-width" class="apply-button">Apply</button>
+    </div>
+  </div>
+</div>
+
 <div class="loading-overlay">
   <div class="loading-spinner"></div>
 </div>
+
 
 <script>
 let selectedOption = null;
@@ -202,14 +402,13 @@ function toggleDropdown(id) {
 
 document.querySelectorAll('.device-option').forEach(option => {
   option.addEventListener('click', async () => {
+    const width = parseInt(option.dataset.width);
+    document.getElementById('custom-width').value = width;
     if (selectedOption) {
       selectedOption.classList.remove('selected');
     }
     option.classList.add('selected');
     selectedOption = option;
-    
-    const width = parseInt(option.dataset.width);
-    const deviceName = option.textContent;
     
     // Show loading overlay
     document.querySelector('.loading-overlay').classList.add('show');
@@ -224,7 +423,7 @@ document.querySelectorAll('.device-option').forEach(option => {
       pluginMessage: { 
         type: 'adjust-width', 
         width,
-        deviceName 
+        deviceName: option.textContent 
       }
     }, '*');
     
@@ -236,4 +435,73 @@ document.querySelectorAll('.device-option').forEach(option => {
 document.getElementById('cancel').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
 };
+
+document.getElementById('apply-width').onclick = async () => {
+  const width = parseInt(document.getElementById('custom-width').value);
+  if (width > 0) {
+    if (selectedOption) {
+      selectedOption.classList.remove('selected');
+    }
+    
+    // Show loading overlay
+    document.querySelector('.loading-overlay').classList.add('show');
+    
+    // Close dropdown
+    document.getElementById('custom-content').classList.remove('open');
+    
+    // Wait for 1 second like device options
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'adjust-width', 
+        width,
+        deviceName: 'Custom'
+      }
+    }, '*');
+    
+    // Hide loading overlay after message is sent
+    document.querySelector('.loading-overlay').classList.remove('show');
+  }
+};
+
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  const lightButton = document.querySelector('.theme-toggle-button.light');
+  const darkButton = document.querySelector('.theme-toggle-button.dark');
+  
+  if (theme === 'dark') {
+    lightButton.classList.remove('active');
+    darkButton.classList.add('active');
+  } else {
+    lightButton.classList.add('active');
+    darkButton.classList.remove('active');
+  }
+}
+
+async function checkAuth() {
+  const isAuthenticated = await parent.postMessage({ 
+    pluginMessage: { type: 'check-auth' }
+  }, '*');
+  
+  if (isAuthenticated) {
+    document.getElementById('auth-screen').style.display = 'none';
+  }
+}
+
+document.getElementById('google-signin').onclick = () => {
+  // Open Google OAuth popup
+  window.open(
+    `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=${CLIENT_ID}&` +
+    `redirect_uri=${REDIRECT_URI}&` +
+    `response_type=code&` +
+    `scope=email profile`,
+    'oauth',
+    'width=500,height=600'
+  );
+};
+
+// Call checkAuth on load
+checkAuth();
 </script>

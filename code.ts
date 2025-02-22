@@ -1,3 +1,8 @@
+/// <reference types="@figma/plugin-typings" />
+
+import { initializeAuth, handleAuthCallback } from './src/auth';
+
+
 figma.showUI(__html__, { width: 300, height: 480 });
 
 // Function to check if node is an image
@@ -123,7 +128,7 @@ function convertGroupToFrame(group: GroupNode): FrameNode {
 }
 
 // Function to adjust frame width
-function adjustFrameWidth(targetWidth: number) {
+async function adjustFrameWidth(targetWidth: number) {
   const selection = figma.currentPage.selection;
   
   if (selection.length === 0) {
@@ -131,9 +136,12 @@ function adjustFrameWidth(targetWidth: number) {
     return;
   }
 
+  // Animate all selected nodes first
+ 
+
+  // Then apply width adjustments
   selection.forEach(node => {
     if (node.type === 'GROUP') {
-      // Convert group to frame first
       const frame = convertGroupToFrame(node);
       applyVerticalLayout(frame, targetWidth, 0);
     } else if (node.type === 'FRAME') {
@@ -156,6 +164,16 @@ function adjustFrameWidth(targetWidth: number) {
 
 // Listen for messages from the UI
 figma.ui.onmessage = async msg => {
+  if (msg.type === 'check-auth') {
+    const isAuthenticated = await initializeAuth();
+    figma.ui.postMessage({ type: 'auth-status', isAuthenticated });
+  }
+  
+  if (msg.type === 'auth-callback') {
+    await handleAuthCallback(msg.code);
+    figma.ui.postMessage({ type: 'auth-success' });
+  }
+  
   if (msg.type === 'adjust-width') {
     await adjustFrameWidth(msg.width);
     figma.notify(`${msg.width}px generated`, { timeout: 2000 });
@@ -165,3 +183,5 @@ figma.ui.onmessage = async msg => {
     figma.closePlugin();
   }
 };
+
+

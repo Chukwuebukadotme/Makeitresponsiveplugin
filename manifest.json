@@ -12,7 +12,11 @@
   "ui": "ui.html",
   "networkAccess": {
     "allowedDomains": [
-      "none"
+      "https://oauth2.googleapis.com",
+      "https://www.googleapis.com",
+      "https://accounts.google.com",
+      "https://api.stripe.com",
+      "https://js.stripe.com"
     ]
   }
 }

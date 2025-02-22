@@ -10,7 +10,13 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@figma/plugin-typings": "^1.106.0",
-    "typescript": "^5.0.0"
+    "@figma/plugin-typings": "^1.107.0-beta.2",
+    "@types/node": "^22.13.1",
+    "@types/stripe": "^8.0.416",
+    "typescript": "^5.0.0",
+    "undici-types": "^7.3.0"
+  },
+  "dependencies": {
+    "stripe": "^17.6.0"
   }
 }
