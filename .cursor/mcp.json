@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "html.to.design": {
+      "url": "https://h2d-mcp.divriots.com/b233c98a-caac-4a2a-8f32-60b352a0a7f7/sse"
+    },
+    "figma": {
+      "url": "https://www.figma.com/file/desktop"
+    }
+  }
+} 

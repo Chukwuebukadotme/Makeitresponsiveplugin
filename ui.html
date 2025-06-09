@@ -1,507 +1,1256 @@
-<style>
-  body {
-    font-family: Inter, sans-serif;
-    padding: 48px 16px 16px 16px;
-    background: white;
-  }
-  
-  .dropdown-section {
-    margin-bottom: 12px;
-  }
-  
-  .dropdown-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-    border: 1px solid #E5E5E5;
-    border-radius: 8px;
-    padding: 12px 16px;
-    background: white;
-  }
-  
-  .dropdown-title {
-    font-size: 14px;
-    font-weight: 400;
-    color: #666;
-  }
-  
-  .dropdown-arrow {
-    width: 16px;
-    height: 16px;
-    transition: transform 0.2s ease;
-  }
-  
-  .dropdown-arrow.open {
-    transform: rotate(180deg);
-  }
-  
-  .dropdown-content {
-    display: none;
-    position: absolute;
-    background: white;
-    border: 1px solid #E5E5E5;
-    border-radius: 8px;
-    margin-top: 4px;
-    width: calc(100% - 32px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    max-height: 300px;
-    overflow-y: auto;
-  }
-  
-  .dropdown-content.open {
-    display: block;
-  }
-  
-  .device-option {
-    padding: 10px 16px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #333;
-    display: flex;
-    align-items: center;
-  }
-  
-  .device-option:hover {
-    background: #F5F7FF;
-  }
-  
-  .device-option.selected {
-    background: #F5F7FF;
-    color: #18A0FB;
-  }
-  
-  .device-option::before {
-    content: '';
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-    background-size: contain;
-  }
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Inter, sans-serif;
+      padding: 16px;
+      background: #1E1E1E;
+      color: #FFFFFF;
+      margin: 0;
+    }
+    
+    .plugin-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .plugin-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+    
+    .plugin-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #FFFFFF;
+      margin: 0;
+    }
+    
+    .tab-container {
+      display: flex;
+      margin-bottom: 24px;
+      background: #2C2C2C;
+      border-radius: 8px;
+      padding: 4px;
+    }
+    
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+    
+    .tab.active {
+      background: #3C3C3C;
+    }
+    
+    .tab-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .tab-content.active {
+      display: block;
+      opacity: 1;
+    }
+    
+    .welcome-message {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .welcome-message h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .welcome-message p {
+      font-size: 12px;
+      color: #AAAAAA;
+      margin: 0;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #AAAAAA;
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #2C2C2C;
+      border: 1px solid #3C3C3C;
+      border-radius: 6px;
+      color: #FFFFFF;
+      font-size: 14px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23AAAAAA' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 16px 0;
+      color: #AAAAAA;
+      font-size: 12px;
+      position: relative;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #3C3C3C;
+    }
 
-  .loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+    .divider::before {
+      left: 0;
+    }
+    
+    .divider::after {
+      right: 0;
+    }
+    
+    .custom-width-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #2C2C2C;
+      border: 1px solid #3C3C3C;
+      border-radius: 6px;
+      color: #FFFFFF;
+      font-size: 14px;
+    }
+    
+    .disclaimer {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 24px;
+      margin-bottom: 24px;
+      font-size: 12px;
+      color: #AAAAAA;
+      line-height: 1.4;
+    }
+    
+    .disclaimer svg {
+      margin-right: 8px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .disclaimer-text {
+      flex: 1;
+    }
+    
+    .action-button {
+      width: 100%;
+      padding: 12px;
+      background: #0D99FF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid #28C1FF;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
 
-  .loading-spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid #E5E5E5;
-    border-top: 2px solid #18A0FB;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
+    .action-button:hover {
+      background: #0B87E4;
+    }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+    .action-button:disabled {
+      background: #3C3C3C;
+      border-bottom-color: #555555;
+      cursor: not-allowed;
+    }
+    
+    /* Breakpoints Tab Styles */
+    .breakpoints-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .breakpoints-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
 
-  .loading-overlay.show {
-    display: flex;
-  }
+    .add-new-button {
+      background: #0D99FF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #28C1FF;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .add-new-button svg {
+      margin-left: 4px;
+    }
+    
+    .breakpoint-item {
+      background: #2C2C2C;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .breakpoint-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    .breakpoint-icon {
+      margin-right: 12px;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #3C3C3C;
+      border-radius: 4px;
+      padding: 4px;
+    }
+    
+    .breakpoint-name {
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    
+    .breakpoint-size {
+      color: #0D99FF;
+    }
+    
+    .breakpoint-actions {
+      display: flex;
+      align-items: center;
+    }
+    
+    .breakpoint-action-button {
+      background: #3C3C3C;
+      border: none;
+      color: #AAAAAA;
+      cursor: pointer;
+      padding: 4px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    
+    .breakpoint-action-button:hover {
+      color: #FFFFFF;
+    }
+    
+    .breakpoint-action-button.selected {
+      background: #0D99FF;
+      color: #FFFFFF;
+    }
 
-  .theme-toggle {
-    position: fixed;
-    top: 8px;
-    right: 8px;
-    z-index: 1001;
-  }
+    .breakpoint-connector {
+      width: 100%;
+      height: 2px;
+      background: rgba(13, 153, 255, 0.4);
+      margin: 12px 0;
+    }
 
-  .theme-toggle-button {
-    width: 24px;
-    height: 24px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-  }
+    .breakpoint-item.selected {
+      border: 1px solid #0D99FF;
+      background: rgba(13, 153, 255, 0.1);
+    }
 
-  .theme-toggle-button.active {
-    background: #6E56CF;
-  }
+    #responsive-frame-info {
+      background: #2C2C2C;
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+    }
 
-  [data-theme="dark"] {
-    background: #1C1C1C;
-    color: #FFFFFF;
-  }
+    .current-width,
+    .current-breakpoint {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
 
-  [data-theme="dark"] .dropdown-header {
-    background: #2C2C2C;
-    border-color: #3C3C3C;
-  }
+    .current-width span,
+    .current-breakpoint span {
+      color: #0D99FF;
+      font-weight: 500;
+    }
 
-  [data-theme="dark"] .dropdown-title {
-    color: #E5E5E5;
-  }
+    .interactive-mode-section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-  [data-theme="dark"] .dropdown-content {
-    background: #2C2C2C;
-    border-color: #3C3C3C;
-  }
+    .interactive-mode-section .action-button {
+      margin-bottom: 16px;
+    }
 
-  [data-theme="dark"] .device-option {
-    color: #E5E5E5;
-  }
+    .interactive-mode-section .disclaimer {
+      margin-top: 12px;
+      margin-bottom: 0;
+    }
 
-  [data-theme="dark"] .device-option:hover {
-    background: #3C3C3C;
-  }
+    .auth-dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
 
-  [data-theme="dark"] #custom-width {
-    background: #2C2C2C;
-    border-color: #3C3C3C;
-    color: #E5E5E5;
-  }
+    .auth-content {
+      background: #2C2C2C;
+      border-radius: 8px;
+      padding: 24px;
+      width: 80%;
+      max-width: 320px;
+    }
 
-  [data-theme="dark"] #custom-width::placeholder {
-    color: #999;
-  }
+    .auth-content h3 {
+      margin-top: 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
 
-  [data-theme="dark"] .dropdown-arrow path {
-    stroke: #E5E5E5;
-  }
+    .auth-content p {
+      font-size: 14px;
+      color: #AAAAAA;
+      margin-bottom: 16px;
+    }
 
-  [data-theme="dark"] .loading-overlay {
-    background: rgba(28, 28, 28, 0.9);
-  }
+    #auth-email {
+      width: 100%;
+      padding: 10px 12px;
+      background: #1E1E1E;
+      border: 1px solid #3C3C3C;
+      border-radius: 6px;
+      color: #FFFFFF;
+      font-size: 14px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
 
-  .custom-width-section {
-    padding: 16px;
-    display: flex;
-    gap: 8px;
-  }
+    #auth-submit {
+      margin-top: 8px;
+    }
 
-  .custom-section {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
-  }
+    .auth-success {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(39, 174, 96, 0.9);
+      color: white;
+      padding: 16px;
+      text-align: center;
+      z-index: 999;
+      animation: slideDown 0.3s ease;
+      transition: opacity 0.5s ease;
+    }
 
-  #custom-width {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #E5E5E5;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #333;
-  }
+    .auth-success-content {
+      max-width: 320px;
+      margin: 0 auto;
+    }
 
-  .apply-button {
-    width: 100%;
-    background: #0D99FF;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-  }
+    .auth-success h3 {
+      margin-top: 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
 
-  .apply-button:hover {
-    background: #0B87E4;
-  }
+    .auth-success p {
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
 
-  .attribution {
-    text-align: center;
-    margin-top: 16px;
-    font-size: 12px;
-    color: #666;
-  }
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
 
-  [data-theme="dark"] .attribution {
-    color: #999;
-  }
+    .auth-status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #2C2C2C;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #AAAAAA;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-  .attribution a {
-    color: #0D99FF;
-    text-decoration: none;
-  }
+    .auth-status {
+      display: flex;
+      align-items: center;
+    }
 
-  [data-theme="dark"] .attribution a {
-    color: #6E56CF;
-  }
+    .auth-indicator {
+      color: #27AE60;
+      margin-right: 8px;
+    }
 
-  .toggle-switch {
-    position: relative;
-    width: 24px;
-    height: 14px;
-  }
+    .auth-email {
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-  .toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
+    .payment-steps {
+      margin: 20px 0;
+      padding-left: 0;
+    }
 
-  .toggle-label {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #E5E5E5;
-    transition: .3s;
-    border-radius: 12px;
-  }
+    .payment-steps li {
+      margin-bottom: 16px;
+      list-style: none;
+    }
 
-  .toggle-button {
-    position: absolute;
-    content: "";
-    height: 10px;
-    width: 10px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    transition: .3s;
-    border-radius: 50%;
-  }
+    .payment-steps input {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      background: #1E1E1E;
+      border: 1px solid #3C3C3C;
+      border-radius: 4px;
+      color: #FFFFFF;
+    }
 
-  input:checked + .toggle-label {
-    background-color: #6E56CF;
-  }
+    #checkout-button {
+      background: #635BFF;
+      margin: 8px 0;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      height: 42px;
+    }
 
-  input:checked + .toggle-label .toggle-button {
-    transform: translateX(10px);
-  }
+    #checkout-button:hover {
+      background: #7B75FF;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
 
-  [data-theme="dark"] .toggle-label {
-    background-color: #3C3C3C;
-  }
-</style>
+    #checkout-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-<div class="theme-toggle">
-  <div class="toggle-switch">
-    <input type="checkbox" id="theme-toggle" onchange="setTheme(this.checked ? 'dark' : 'light')">
-    <label for="theme-toggle" class="toggle-label">
-      <span class="toggle-button"></span>
-    </label>
+    #verify-payment {
+      margin-top: 8px;
+    }
+
+    .payment-error {
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 4px;
+      background: rgba(255, 68, 68, 0.1);
+    }
+
+    .trial-banner {
+      background: linear-gradient(to right, #0D99FF, #4A6FFF);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      color: white;
+    }
+    
+    .trial-banner-title {
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .trial-banner-text {
+      font-size: 12px;
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
+    
+    .trial-banner-button {
+      background: white;
+      color: #0D99FF;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 38px;
+    }
+    
+    .trial-banner-button:hover {
+      background: #f0f0f0;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .trial-banner-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .trial-counter {
+      font-weight: bold;
+    }
+
+    .pro-subscribe {
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .pro-subscribe-button {
+      background: linear-gradient(45deg, #0D99FF, #4A6FFF, #0D99FF);
+      background-size: 200% 200%;
+      animation: gradient-animation 3s ease infinite;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(13, 153, 255, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pro-subscribe-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(13, 153, 255, 0.5);
+    }
+
+    .pro-subscribe-button:active {
+      transform: translateY(0);
+    }
+
+    .sparkle-icon {
+      font-size: 16px;
+    }
+
+    @keyframes gradient-animation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="plugin-header">
+    <h1 class="plugin-title">Welcome to Make It Responsive</h1>
   </div>
-</div>
 
-<div class="dropdown-section">
-  <div class="dropdown-header" onclick="toggleDropdown('android')">
-    <span class="dropdown-title" data-original-title="Android">Android</span>
-    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="dropdown-content" id="android-content">
-    <div class="device-option" data-width="412">Pixel (412px)</div>
-    <div class="device-option" data-width="700">Tablet (700px)</div>
-  </div>
-</div>
 
-<div class="dropdown-section">
-  <div class="dropdown-header" onclick="toggleDropdown('iphone')">
-    <span class="dropdown-title" data-original-title="iPhone">iPhone</span>
-    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
+  <div class="welcome-message">
+    <p>Save time, convert your design to various screensizes</p>
   </div>
-  <div class="dropdown-content" id="iphone-content">
-    <div class="device-option" data-width="393">iPhone 14 (393px)</div>
-    <div class="device-option" data-width="402">iPhone 14 Pro (402px)</div>
-    <div class="device-option" data-width="440">iPhone 14 Plus (440px)</div>
-    <div class="device-option" data-width="430">iPhone 14 Pro Max (430px)</div>
-    <div class="device-option" data-width="390">iPhone 13 (390px)</div>
-    <div class="device-option" data-width="428">iPhone 13 Pro Max (428px)</div>
-    <div class="device-option" data-width="375">iPhone SE (375px)</div>
-    <div class="device-option" data-width="320">iPhone 5/SE (320px)</div>
-  </div>
-</div>
 
-<div class="dropdown-section">
-  <div class="dropdown-header" onclick="toggleDropdown('tablet')">
-    <span class="dropdown-title" data-original-title="Tablet">Tablet</span>
-    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
+  <!-- Add the subscribe button here, right after the plugin header -->
+  <!--
+  <div class="pro-subscribe">
+    <button class="pro-subscribe-button" id="pro-subscribe-button">
+      <span class="sparkle-icon">✨</span>
+      Subscribe to unlock Pro features
+      <span class="sparkle-icon">✨</span>
+    </button>
   </div>
-  <div class="dropdown-content" id="tablet-content">
-    <div class="device-option" data-width="1280">iPad (1280px)</div>
-    <div class="device-option" data-width="1440">iPad Pro (1440px)</div>
-    <div class="device-option" data-width="744">iPad Mini (744px)</div>
-    <div class="device-option" data-width="834">iPad Air (834px)</div>
-    <div class="device-option" data-width="1024">iPad Pro 11" (1024px)</div>
-  </div>
-</div>
+  -->
 
-<div class="dropdown-section">
-  <div class="dropdown-header" onclick="toggleDropdown('desktop')">
-    <span class="dropdown-title" data-original-title="Desktop">Desktop</span>
-    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="dropdown-content" id="desktop-content">
-    <div class="device-option" data-width="1280">Small (1280px)</div>
-    <div class="device-option" data-width="1512">Medium (1512px)</div>
-    <div class="device-option" data-width="1728">Large (1728px)</div>
-    <div class="device-option" data-width="1440">HD (1440px)</div>
-  </div>
-</div>
-
-<div class="dropdown-section">
-  <div class="dropdown-header" onclick="toggleDropdown('custom')">
-    <span class="dropdown-title" data-original-title="Custom Width">Custom Width(px)</span>
-    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M4 6L8 10L12 6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="dropdown-content" id="custom-content">
-    <div class="custom-section">
-      <input type="number" id="custom-width" placeholder="0.00" min="0" step="1">
-      <button id="apply-width" class="apply-button">Apply</button>
+  <!--
+  <div id="trial-promotion">
+    <div class="trial-banner">
+      <div class="trial-banner-title">You're using the free trial version</div>
+      <div class="trial-banner-text">
+        You have <span class="trial-counter">5</span> free uses remaining. 
+        Subscribe now to unlock all features and unlimited usage!
+      </div>
+      <button class="trial-banner-button" id="trial-subscribe">
+        Subscribe to unlock all features for a year
+      </button>
     </div>
   </div>
-</div>
+  -->
 
-<div class="loading-overlay">
-  <div class="loading-spinner"></div>
-</div>
+  <div class="tab-container">
+    <div class="tab active" data-tab="resize">Resize Screens</div>
+    <div class="tab" data-tab="breakpoints">Breakpoints</div>
+  </div>
 
+  <div class="tab-content active" id="resize-tab">
+    <div class="form-group">
+      <label>Device Type</label>
+      <select id="device-select">
+        <option value="desktop">Desktop</option>
+        <option value="tablet">Tablet</option>
+        <option value="mobile">Mobile</option>
+      </select>
+    </div>
 
-<script>
-let selectedOption = null;
+    <div class="form-group">
+      <label>Model</label>
+      <select id="model-select">
+        <!-- Options will be populated dynamically -->
+      </select>
+    </div>
 
-function toggleDropdown(id) {
-  const allDropdowns = document.querySelectorAll('.dropdown-content');
-  const allHeaders = document.querySelectorAll('.dropdown-header');
-  
-  allDropdowns.forEach(dropdown => {
-    if (dropdown.id !== `${id}-content`) {
-      dropdown.classList.remove('open');
-      dropdown.previousElementSibling.classList.remove('active');
-    }
-  });
+    <button id="apply-magic" class="action-button">Apply Layout</button>
 
-  const content = document.getElementById(`${id}-content`);
-  const header = content.previousElementSibling;
-  
-  content.classList.toggle('open');
-  header.classList.toggle('active');
-}
+    <div class="disclaimer" style="margin-top: 16px;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z" stroke="#AAAAAA" stroke-width="1.5"/>
+        <path d="M8 5V8" stroke="#AAAAAA" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="11" r="0.5" fill="#AAAAAA"/>
+      </svg>
+      <div class="disclaimer-text">
+        For best results, use auto layout frames. You may need to manually adjust heights after resizing for optimal layouts.
+      </div>
+    </div>
+  </div>
 
-document.querySelectorAll('.device-option').forEach(option => {
-  option.addEventListener('click', async () => {
-    const width = parseInt(option.dataset.width);
-    document.getElementById('custom-width').value = width;
-    if (selectedOption) {
-      selectedOption.classList.remove('selected');
-    }
-    option.classList.add('selected');
-    selectedOption = option;
+  <div class="tab-content" id="breakpoints-tab">
+    <div class="breakpoints-header">
+      <div class="breakpoints-title">Breakpoints</div>
+      <button class="add-new-button" id="reset-breakpoints">
+        Reset
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 6C2 3.79086 3.79086 2 6 2C8.20914 2 10 3.79086 10 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M1 4L3 6L5 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      </button>
+    </div>
     
-    // Show loading overlay
-    document.querySelector('.loading-overlay').classList.add('show');
-    
-    // Close dropdown
-    option.closest('.dropdown-content').classList.remove('open');
-    
-    // Wait for 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    parent.postMessage({ 
-      pluginMessage: { 
-        type: 'adjust-width', 
-        width,
-        deviceName: option.textContent 
+    <div class="breakpoint-list">
+      <div class="breakpoint-item" data-type="desktop">
+        <div class="breakpoint-info">
+          <div class="breakpoint-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="3" width="12" height="9" rx="1" stroke="#0D99FF" stroke-width="1.5"/>
+              <path d="M5 13H11" stroke="#0D99FF" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <span class="breakpoint-name">Desktop</span>
+            <span class="breakpoint-size" id="desktop-size"></span>
+          </div>
+        </div>
+        <div class="breakpoint-actions">
+          <button class="breakpoint-action-button" id="desktop-select">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+    </div>
+  </div>
+
+      <div class="breakpoint-item" data-type="tablet">
+        <div class="breakpoint-info">
+          <div class="breakpoint-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="2" width="10" height="12" rx="1" stroke="#0D99FF" stroke-width="1.5"/>
+      </svg>
+    </div>
+          <div>
+            <span class="breakpoint-name">Tablet</span>
+            <span class="breakpoint-size" id="tablet-size"></span>
+          </div>
+        </div>
+        <div class="breakpoint-actions">
+          <button class="breakpoint-action-button" id="tablet-select">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+    </div>
+  </div>
+
+      <div class="breakpoint-item" data-type="mobile">
+        <div class="breakpoint-info">
+          <div class="breakpoint-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="2" width="6" height="12" rx="1" stroke="#0D99FF" stroke-width="1.5"/>
+      </svg>
+    </div>
+          <div>
+            <span class="breakpoint-name">Mobile</span>
+            <span class="breakpoint-size" id="mobile-size"></span>
+          </div>
+        </div>
+        <div class="breakpoint-actions">
+          <button class="breakpoint-action-button" id="mobile-select">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="interactive-mode-section">
+    <button class="action-button" id="start-interactive-mode">
+      Start Interactive Responsive Mode
+    </button>
+    <div class="disclaimer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z" stroke="#AAAAAA" stroke-width="1.5"/>
+        <path d="M8 5V8" stroke="#AAAAAA" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="8" cy="11" r="0.5" fill="#AAAAAA"/>
+      </svg>
+      <div class="disclaimer-text">
+        Interactive mode allows you to drag the frame width and see your design adapt in real-time across different breakpoints.
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!--
+  <template id="payment-auth-dialog">
+    <div class="auth-dialog">
+      <div class="auth-content">
+        <h3>Plugin Access Required</h3>
+        <p>To use this plugin, please follow these steps:</p>
+        <ol class="payment-steps">
+          <li>
+            1. Purchase access using the button below
+            <button id="checkout-button" class="action-button">
+              Subscribe to unlock all features
+            </button>
+          </li>
+          <li>
+            2. Enter your email for Figma account, payment details and complete the purchase
+          </li>
+          <li>
+            3. Verify your email
+            <input type="email" id="auth-email" placeholder="Your email address" />
+            <button id="verify-payment" class="action-button">
+              Verify Email
+            </button>
+          </li>
+        </ol>
+        <div class="payment-error" style="display: none; color: #ff4444;"></div>
+      </div>
+    </div>
+  </template>
+  -->
+
+  <script>
+    // Define device models and their widths
+    const DEVICE_WIDTHS = {
+      desktop: {
+        standard: { name: "Standard Desktop", width: 1920 },
+        laptop: { name: "Laptop", width: 1440 },
+        smallLaptop: { name: "Small Laptop", width: 1280 }
+      },
+      tablet: {
+        ipadPro: { name: "iPad Pro", width: 1024 },
+        ipad: { name: "iPad", width: 768 },
+        smallTablet: { name: "Small Tablet", width: 720 }
+      },
+      mobile: {
+        iphonePro: { name: "iPhone Pro Max", width: 428 },
+        iphone: { name: "iPhone", width: 375 },
+        smallPhone: { name: "Small Phone", width: 320 }
       }
-    }, '*');
+    };
     
-    // Hide loading overlay after message is sent
-    document.querySelector('.loading-overlay').classList.remove('show');
-  });
-});
-
-document.getElementById('cancel').onclick = () => {
-  parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
-};
-
-document.getElementById('apply-width').onclick = async () => {
-  const width = parseInt(document.getElementById('custom-width').value);
-  if (width > 0) {
-    if (selectedOption) {
-      selectedOption.classList.remove('selected');
+    // Store selected breakpoint frames
+    const selectedBreakpoints = {
+      desktop: null,
+      tablet: null,
+      mobile: null
+    };
+    
+    // Tab switching functionality with improved transitions
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Get the tab ID to show
+        const tabId = tab.dataset.tab;
+        
+        // Hide all tab contents with transition
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.style.opacity = '0';
+          setTimeout(() => {
+            content.classList.remove('active');
+          }, 200);
+        });
+        
+        // Show the selected tab content
+        setTimeout(() => {
+          const targetContent = document.getElementById(`${tabId}-tab`);
+          if (targetContent) {
+            targetContent.classList.add('active');
+            setTimeout(() => {
+              targetContent.style.opacity = '1';
+            }, 50);
+          }
+        }, 210);
+      });
+    });
+    
+    // Initialize device and model selects
+    const deviceSelect = document.getElementById('device-select');
+    const modelSelect = document.getElementById('model-select');
+    
+    // Function to update model options based on selected device
+    function updateModelOptions(deviceType) {
+      modelSelect.innerHTML = '';
+      const models = DEVICE_WIDTHS[deviceType];
+      
+      Object.entries(models).forEach(([key, model]) => {
+        const option = document.createElement('option');
+        option.value = model.width;
+        option.textContent = `${model.name} (${model.width}px)`;
+        modelSelect.appendChild(option);
+      });
     }
     
-    // Show loading overlay
-    document.querySelector('.loading-overlay').classList.add('show');
+    // Initialize with desktop options
+    updateModelOptions('desktop');
     
-    // Close dropdown
-    document.getElementById('custom-content').classList.remove('open');
+    // Update models when device changes
+    deviceSelect.addEventListener('change', (e) => {
+      updateModelOptions(e.target.value);
+    });
     
-    // Wait for 1 second like device options
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Handle apply magic button click
+    document.getElementById('apply-magic').addEventListener('click', () => {
+      const width = parseInt(modelSelect.value);
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'adjust-width',
+          width: width
+        }
+      }, '*');
+    });
     
-    parent.postMessage({ 
-      pluginMessage: { 
-        type: 'adjust-width', 
-        width,
-        deviceName: 'Custom'
+    // Breakpoint selection handlers
+    document.getElementById('desktop-select').addEventListener('click', () => {
+      selectBreakpoint('desktop');
+    });
+    
+    document.getElementById('tablet-select').addEventListener('click', () => {
+      selectBreakpoint('tablet');
+    });
+    
+    document.getElementById('mobile-select').addEventListener('click', () => {
+      selectBreakpoint('mobile');
+    });
+    
+    function selectBreakpoint(type) {
+        parent.postMessage({ 
+          pluginMessage: { 
+          type: 'select-breakpoint', 
+          breakpointType: type
+          }
+        }, '*');
+    }
+    
+    // Reset breakpoints button
+    document.getElementById('reset-breakpoints').addEventListener('click', () => {
+      // Reset UI
+      ['desktop', 'tablet', 'mobile'].forEach(type => {
+        const button = document.getElementById(`${type}-select`);
+        const sizeElement = document.getElementById(`${type}-size`);
+        
+        // Reset icon
+        button.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 3V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        `;
+        button.classList.remove('selected');
+        
+        // Clear size text
+        sizeElement.textContent = '';
+      });
+      
+      // Disable the Make It Responsive button
+      document.getElementById('make-responsive').disabled = true;
+      
+      // Notify the plugin
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'reset-breakpoints'
+        }
+      }, '*');
+    });
+    
+    // Update UI when a breakpoint is selected
+    function updateBreakpointUI(type, nodeId, width) {
+      // Update UI
+      const button = document.getElementById(`${type}-select`);
+      const sizeElement = document.getElementById(`${type}-size`);
+      
+      // Change plus icon to checkmark
+      button.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 8L7 12L13 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+      button.classList.add('selected');
+      
+      // Update size text
+      sizeElement.textContent = `${width}px`;
+    }
+    
+    // Message handler to receive updates from the plugin
+    window.addEventListener('message', (event) => {
+      const msg = event.data.pluginMessage;
+      
+      if (msg.type === 'breakpoint-selected') {
+        updateBreakpointUI(msg.breakpointType, msg.nodeId, msg.width);
       }
-    }, '*');
-    
-    // Hide loading overlay after message is sent
-    document.querySelector('.loading-overlay').classList.remove('show');
-  }
-};
+      
+      if (msg.type === 'interactive-mode-started') {
+        // Show the frame info section
+        const frameInfo = document.createElement('div');
+        frameInfo.id = 'responsive-frame-info';
+        frameInfo.innerHTML = `
+          <div class="current-width">Current Width: <span>${msg.width}px</span></div>
+          <div class="current-breakpoint">Active Breakpoint: <span>${msg.currentBreakpoint}</span></div>
+        `;
+        document.getElementById('resize-tab').appendChild(frameInfo);
+      }
 
-function setTheme(theme) {
-  document.body.setAttribute('data-theme', theme);
-  const lightButton = document.querySelector('.theme-toggle-button.light');
-  const darkButton = document.querySelector('.theme-toggle-button.dark');
-  
-  if (theme === 'dark') {
-    lightButton.classList.remove('active');
-    darkButton.classList.add('active');
-  } else {
-    lightButton.classList.add('active');
-    darkButton.classList.remove('active');
-  }
-}
+      if (msg.type === 'frame-resized') {
+        // Update the width and breakpoint display
+        const widthDisplay = document.querySelector('#responsive-frame-info .current-width span');
+        const breakpointDisplay = document.querySelector('#responsive-frame-info .current-breakpoint span');
+        if (widthDisplay) widthDisplay.textContent = `${Math.round(msg.width)}px`;
+        if (breakpointDisplay) breakpointDisplay.textContent = msg.breakpoint;
+      }
 
-async function checkAuth() {
-  const isAuthenticated = await parent.postMessage({ 
-    pluginMessage: { type: 'check-auth' }
-  }, '*');
-  
-  if (isAuthenticated) {
-    document.getElementById('auth-screen').style.display = 'none';
-  }
-}
+      /*
+      if (msg.type === 'check-authorization') {
+        console.log('Authorization check requested');
+        
+        // Show authorization dialog
+        const authDialog = document.createElement('div');
+        authDialog.className = 'auth-dialog';
+        authDialog.innerHTML = `
+          <div class="auth-content">
+            <h3>Authorization Required</h3>
+            <p>Please enter your email to verify access:</p>
+            <input type="email" id="auth-email" placeholder="Your email address" />
+            <button id="auth-submit" class="action-button">Verify Access</button>
+          </div>
+        `;
+        document.body.appendChild(authDialog);
+        
+        // Handle the submit button
+        document.getElementById('auth-submit').addEventListener('click', () => {
+          const email = document.getElementById('auth-email').value;
+          if (!email || !email.includes('@')) {
+            alert('Please enter a valid email address');
+            return;
+          }
+          
+          console.log('Sending email for verification:', email);
+          
+          // Send the email for verification
+          parent.postMessage({
+            pluginMessage: {
+              type: 'verify-authorization',
+              email: email
+            }
+          }, '*');
+          
+          // Show loading state
+          authDialog.innerHTML = `
+            <div class="auth-content">
+              <h3>Verifying...</h3>
+              <p>Checking your authorization...</p>
+            </div>
+          `;
+        });
+      }
+      
+      if (msg.type === 'authorization-result') {
+        // Remove auth dialog if it exists
+        const authDialog = document.querySelector('.auth-dialog');
+        if (authDialog) {
+          authDialog.remove();
+        }
+        
+        if (msg.authorized) {
+          // Show success message
+          const successMessage = document.createElement('div');
+          successMessage.className = 'auth-success';
+          successMessage.innerHTML = `
+            <div class="auth-success-content">
+              <h3>✓ Authorized</h3>
+              <p>Welcome! You're authorized to use this plugin.</p>
+              <button id="auth-success-close" class="action-button">Continue</button>
+            </div>
+          `;
+          document.body.appendChild(successMessage);
+          
+          // Auto-remove after 3 seconds
+          setTimeout(() => {
+            successMessage.style.opacity = '0';
+            setTimeout(() => successMessage.remove(), 500);
+          }, 3000);
+          
+          // Or remove on button click
+          document.getElementById('auth-success-close')?.addEventListener('click', () => {
+            successMessage.remove();
+          });
+        }
+      }
 
-document.getElementById('google-signin').onclick = () => {
-  // Open Google OAuth popup
-  window.open(
-    `https://accounts.google.com/o/oauth2/v2/auth?` +
-    `client_id=${CLIENT_ID}&` +
-    `redirect_uri=${REDIRECT_URI}&` +
-    `response_type=code&` +
-    `scope=email profile`,
-    'oauth',
-    'width=500,height=600'
-  );
-};
+      if (msg.type === 'show-payment-auth') {
+        // Show payment dialog
+        const template = document.getElementById('payment-auth-dialog');
+        const clone = template.content.cloneNode(true);
+        document.body.appendChild(clone);
+        
+        // Add trial expired message if applicable
+        if (msg.trialExpired) {
+          const header = document.querySelector('.auth-content h3');
+          const intro = document.querySelector('.auth-content p');
+          
+          if (header) header.textContent = 'Trial Period Ended';
+          if (intro) intro.innerHTML = 'You\'ve used your 5 free uses of the plugin. To continue using all features, please purchase a license:';
+        }
+        
+        // Handle checkout button
+        document.getElementById('checkout-button').addEventListener('click', () => {
+          console.log('Opening checkout URL:', msg.checkoutUrl);
+          try {
+            window.open(msg.checkoutUrl, '_blank', 'noopener,noreferrer');
+          } catch (error) {
+            console.error('Error opening checkout URL:', error);
+            // Fallback method
+            const link = document.createElement('a');
+            link.href = msg.checkoutUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        });
+        
+        // Handle verification
+        document.getElementById('verify-payment').addEventListener('click', () => {
+          const email = document.getElementById('auth-email').value;
+          
+          if (!email) {
+            const error = document.querySelector('.payment-error');
+            error.textContent = 'Please provide your email';
+            error.style.display = 'block';
+            return;
+          }
+          
+          console.log('Sending verification request for email:', email);
+          
+          // Send verification request
+          parent.postMessage({
+            pluginMessage: {
+              type: 'verify-payment',
+              email: email
+            }
+          }, '*');
+        });
+      }
+      
+      if (msg.type === 'authorization-result') {
+        const dialog = document.querySelector('.auth-dialog');
+        if (dialog) {
+          if (msg.authorized && msg.paid) {
+            dialog.remove();
+            // Show success message
+            const success = document.createElement('div');
+            success.className = 'auth-success';
+            success.innerHTML = `
+              <div class="auth-success-content">
+                <h3>✓ Access Granted</h3>
+                <p>Thank you for your purchase! You now have full access to the plugin.</p>
+              </div>
+            `;
+            document.body.appendChild(success);
+            setTimeout(() => success.remove(), 3000);
+      } else {
+            const error = document.querySelector('.payment-error');
+            error.textContent = msg.error || 'Verification failed. Please try again.';
+            error.style.display = 'block';
+          }
+        }
+      }
 
-// Call checkAuth on load
-checkAuth();
-</script>
+      // Always ensure the error message element is shown when displaying an error
+      if (msg.type === 'authorization-result' && !msg.authorized) {
+        const error = document.querySelector('.payment-error');
+        if (error) {
+          error.textContent = msg.error || 'Verification failed. Please try again.';
+          error.style.display = 'block';
+        }
+      }
+
+      if (msg.type === 'update-trial-info') {
+        const usesRemaining = msg.usesRemaining;
+        const trialPromotion = document.getElementById('trial-promotion');
+        
+        if (usesRemaining > 0) {
+          // Show trial promotion banner
+          trialPromotion.innerHTML = `
+            <div class="trial-banner">
+              <div class="trial-banner-title">You're using the free trial version</div>
+              <div class="trial-banner-text">
+                You have <span class="trial-counter">${usesRemaining}</span> free uses remaining. 
+                Subscribe now to unlock all features and unlimited usage!
+              </div>
+              <button class="trial-banner-button" id="trial-subscribe">
+                Subscribe to unlock all features for a year
+              </button>
+            </div>
+          `;
+          trialPromotion.style.display = 'block';
+          
+          // Add click handler for the subscription button
+          document.getElementById('trial-subscribe').addEventListener('click', () => {
+            // Request checkout URL from the plugin
+            parent.postMessage({
+              pluginMessage: {
+                type: 'request-checkout-url'
+              }
+            }, '*');
+          });
+        } else {
+          trialPromotion.style.display = 'none';
+        }
+      }
+      
+      if (msg.type === 'provide-checkout-url') {
+        const checkoutUrl = msg.checkoutUrl;
+        if (checkoutUrl) {
+          try {
+            window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+          } catch (error) {
+            console.error('Error opening checkout URL:', error);
+            // Fallback method
+            const link = document.createElement('a');
+            link.href = checkoutUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }
+      }
+      */
+    });
+
+    // Add this to your existing script section
+    document.getElementById('start-interactive-mode').addEventListener('click', () => {
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'start-interactive-mode'
+        }
+      }, '*');
+    });
+
+    const breakpointRanges = {
+      desktop: { min: 1200, max: Infinity },
+      tablet: { min: 768, max: 1199 },
+      mobile: { min: 0, max: 767 }
+    };
+
+    // Add the pro subscribe button handler
+    /* document.getElementById('pro-subscribe-button').addEventListener('click', () => {
+      // Open the Gumroad checkout link
+      try {
+        window.open('https://makeitresponsive.gumroad.com/l/product', '_blank', 'noopener,noreferrer');
+      } catch (error) {
+        console.error('Error opening Gumroad URL:', error);
+        // Fallback method
+        const link = document.createElement('a');
+        link.href = 'https://makeitresponsive.gumroad.com/l/product';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }); */
+
+    document.getElementById('generate-responsive-variants').onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'generate-responsive-variants' } }, '*');
+    };
+  </script>
+
+  <!-- Add this to your plugin UI, e.g. below your existing controls -->
+  <button id="generate-responsive-variants">Generate Responsive Variants</button>
+</body>
+</html>

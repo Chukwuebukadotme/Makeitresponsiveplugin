@@ -1,24 +1,37 @@
+/*
+import { config } from './config';
+
 interface AuthConfig {
   clientId: string;
-  redirectUri: string;
+  serverUrl: string;
   scope: string[];
+  redirectUri: string;
 }
 
 const authConfig: AuthConfig = {
-  clientId: '327794121021-pbm6ohimt1ciantp7783o960ppa8hifn.apps.googleusercontent.com',
-  redirectUri: 'https://www.figma.com/oauth/callback',
-  scope: ['email', 'profile', 'openid']
+  clientId: config.google.clientId,
+  serverUrl: 'https://ac82-154-113-155-6.ngrok-free.app/auth',
+  scope: ['email', 'profile', 'openid'],
+  redirectUri: config.google.redirectUri
 };
 
 export async function initializeAuth() {
   try {
     const isAuthenticated = await figma.clientStorage.getAsync('isAuthenticated');
     if (!isAuthenticated) {
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      // Generate state parameter for security
+      const state = crypto.randomUUID();
+      await figma.clientStorage.setAsync('oauth_state', state);
+      
+      // Start polling for auth completion
+      startAuthPolling(state);
+      
+      // Open auth window
+      const authUrl = `${authConfig.serverUrl}/start?` +
         `client_id=${authConfig.clientId}&` +
-        `redirect_uri=${encodeURIComponent(authConfig.redirectUri)}&` +
-        `response_type=code&` +
-        `scope=${encodeURIComponent(authConfig.scope.join(' '))}`;
+        `state=${state}&` +
+        `scope=${encodeURIComponent(authConfig.scope.join(' '))}&` +
+        `redirect_uri=${encodeURIComponent(authConfig.redirectUri)}`;
       
       figma.showUI(__html__, { width: 300, height: 400 });
       figma.ui.postMessage({ type: 'show-auth', url: authUrl });
@@ -31,9 +44,28 @@ export async function initializeAuth() {
   }
 }
 
-async function exchangeCodeForTokens(code: string) {
+async function startAuthPolling(state: string) {
+  const pollInterval = setInterval(async () => {
+    try {
+      const response = await fetch(`${authConfig.serverUrl}/poll?state=${state}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.access_token) {
+          clearInterval(pollInterval);
+          await figma.clientStorage.setAsync('accessToken', data.access_token);
+          await figma.clientStorage.setAsync('isAuthenticated', true);
+          figma.ui.postMessage({ type: 'auth-success' });
+        }
+      }
+    } catch (error) {
+      console.error('Polling error:', error);
+    }
+  }, 2000);
+}
+
+export async function exchangeCodeForTokens(code: string) {
   const tokenEndpoint = 'https://oauth2.googleapis.com/token';
-  const clientSecret = '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'; // Get this from Google Cloud Console
+  const clientSecret = config.google.clientSecret;
   
   const response = await fetch(tokenEndpoint, {
     method: 'POST',
@@ -78,4 +110,5 @@ export async function handleAuthCallback(code: string) {
     console.error('Auth error:', error);
     throw error;
   }
-} 
+}
+*/ 
