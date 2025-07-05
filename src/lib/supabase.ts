@@ -17,18 +17,24 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Auth helper functions
 export const auth = {
-  // Sign in with Google
+  // Sign in with Google - Updated for Figma plugin OAuth
   async signInWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: 'https://www.figma.com/oauth/callback',
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
         }
       }
     })
+    return { data, error }
+  },
+
+  // Exchange authorization code for session (for Figma OAuth callback)
+  async exchangeCodeForSession(code: string) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     return { data, error }
   },
 
@@ -48,6 +54,12 @@ export const auth = {
   async getCurrentSession() {
     const { data: { session }, error } = await supabase.auth.getSession()
     return { session, error }
+  },
+
+  // Set session (for restoring from storage)
+  async setSession(session: { access_token: string; refresh_token: string }) {
+    const { data, error } = await supabase.auth.setSession(session)
+    return { data, error }
   },
 
   // Listen to auth changes

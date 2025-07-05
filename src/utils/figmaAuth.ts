@@ -1,9 +1,11 @@
-import { supabase, auth } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 
 // Figma plugin authentication utilities
 export class FigmaAuth {
   private static instance: FigmaAuth
   private isInitialized = false
+  private currentUser: any = null
+  private userProfile: any = null
 
   static getInstance(): FigmaAuth {
     if (!FigmaAuth.instance) {
@@ -16,17 +18,8 @@ export class FigmaAuth {
     if (this.isInitialized) return
 
     try {
-      // Check for existing session
-      const { session } = await auth.getCurrentSession()
-      
-      if (session) {
-        // Store session in Figma's client storage for persistence
-        await this.storeSessionInFigma(session)
-      } else {
-        // Try to restore session from Figma storage
-        await this.restoreSessionFromFigma()
-      }
-
+      // Check for existing session in Figma storage
+      await this.restoreSessionFromFigma()
       this.isInitialized = true
     } catch (error) {
       console.error('Failed to initialize Figma auth:', error)
@@ -35,7 +28,17 @@ export class FigmaAuth {
 
   async signInWithGoogle(): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await auth.signInWithGoogle()
+      // For Figma plugins, we need to redirect to https://www.figma.com/oauth/callback
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://www.figma.com/oauth/callback',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      })
       
       if (error) {
         return { success: false, error: error.message }
@@ -47,14 +50,45 @@ export class FigmaAuth {
     }
   }
 
-  async signOut(): Promise<{ success: boolean; error?: string }> {
+  async handleAuthCodeCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await auth.signOut()
+      // Exchange the authorization code for a session
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
         return { success: false, error: error.message }
       }
 
+      if (data.session && data.user) {
+        this.currentUser = data.user
+        
+        // Store session in Figma's client storage
+        await this.storeSessionInFigma(data.session)
+        
+        // Fetch user profile
+        await this.fetchUserProfile()
+        
+        return { success: true }
+      }
+
+      return { success: false, error: 'No session received' }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  }
+
+  async signOut(): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await supabase.auth.signOut()
+      
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      // Clear local state
+      this.currentUser = null
+      this.userProfile = null
+      
       // Clear Figma storage
       await this.clearFigmaStorage()
       
@@ -65,11 +99,58 @@ export class FigmaAuth {
   }
 
   async getCurrentUser() {
-    return await auth.getCurrentUser()
+    return this.currentUser
   }
 
   async getCurrentSession() {
-    return await auth.getCurrentSession()
+    const { data: { session } } = await supabase.auth.getSession()
+    return session
+  }
+
+  async getUserProfile() {
+    return this.userProfile
+  }
+
+  async incrementUsageCount() {
+    if (!this.currentUser) return null
+
+    try {
+      const { data, error } = await supabase.rpc('increment_usage_count', {
+        user_id: this.currentUser.id
+      })
+
+      if (error) {
+        throw error
+      }
+
+      // Refresh profile
+      await this.fetchUserProfile()
+      return data
+    } catch (error) {
+      console.error('Usage increment error:', error)
+      throw error
+    }
+  }
+
+  private async fetchUserProfile() {
+    if (!this.currentUser) return
+
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', this.currentUser.id)
+        .single()
+
+      if (error) {
+        console.error('Error fetching profile:', error)
+        return
+      }
+
+      this.userProfile = data
+    } catch (error) {
+      console.error('Profile fetch error:', error)
+    }
   }
 
   private async storeSessionInFigma(session: any) {
@@ -98,10 +179,15 @@ export class FigmaAuth {
           
           if (storedSession.expires_at > now) {
             // Session is still valid, restore it
-            await supabase.auth.setSession({
+            const { data, error } = await supabase.auth.setSession({
               access_token: storedSession.access_token,
               refresh_token: storedSession.refresh_token
             })
+
+            if (data.user && !error) {
+              this.currentUser = data.user
+              await this.fetchUserProfile()
+            }
           } else {
             // Session expired, clear it
             await this.clearFigmaStorage()
@@ -121,19 +207,6 @@ export class FigmaAuth {
         console.error('Failed to clear Figma storage:', error)
       }
     }
-  }
-
-  // Listen to auth state changes and sync with Figma storage
-  onAuthStateChange(callback: (event: string, session: any) => void) {
-    return auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        await this.storeSessionInFigma(session)
-      } else if (event === 'SIGNED_OUT') {
-        await this.clearFigmaStorage()
-      }
-      
-      callback(event, session)
-    })
   }
 }
 

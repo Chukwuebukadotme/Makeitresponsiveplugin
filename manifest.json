@@ -2,21 +2,22 @@
   "name": "Make It Responsive",
   "id": "1462198874109313248",
   "api": "1.0.0",
-  "main": "code.js",
+  "main": "code-with-auth.js",
   "capabilities": [],
   "enableProposedApi": false,
   "documentAccess": "dynamic-page",
   "editorType": [
     "figma"
   ],
-  "ui": "ui.html",
+  "ui": "ui-react.html",
   "networkAccess": {
     "allowedDomains": [
       "https://oauth2.googleapis.com",
       "https://www.googleapis.com",
       "https://accounts.google.com",
       "https://api.stripe.com",
-      "https://js.stripe.com"
+      "https://js.stripe.com",
+      "https://*.supabase.co"
     ]
   }
 }
