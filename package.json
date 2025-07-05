@@ -5,7 +5,10 @@
   "main": "code.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "watch": "tsc -p tsconfig.json -w"
+    "watch": "tsc -p tsconfig.json -w",
+    "dev": "vite",
+    "build-ui": "vite build",
+    "preview": "vite preview"
   },
   "author": "",
   "license": "MIT",
