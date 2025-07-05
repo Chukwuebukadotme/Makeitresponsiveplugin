@@ -72,6 +72,31 @@ const breakpointRanges = {
   mobile: { min: 0, max: 767 }
 };
 
+// --- START: Type Guards and Interfaces for Type Safety ---
+
+// Interface for nodes that support layout properties (children of Auto Layout)
+interface LayoutMixin {
+  layoutAlign: 'MIN' | 'CENTER' | 'MAX' | 'STRETCH' | 'INHERIT';
+  layoutGrow: number;
+}
+
+// Interface for nodes that support constraints
+interface ConstraintMixin {
+  constraints: Constraints;
+}
+
+// Type guard to check if a node supports layout properties
+function supportsLayout(node: SceneNode): node is SceneNode & LayoutMixin {
+  return 'layoutAlign' in node && 'layoutGrow' in node;
+}
+
+// Type guard to check if a node supports constraints
+function supportsConstraints(node: SceneNode): node is SceneNode & ConstraintMixin {
+  return 'constraints' in node;
+}
+
+// --- END: Type Guards and Interfaces for Type Safety ---
+
 // Function to check if node is an image
 function isImage(node: SceneNode): boolean {
   return node.type === 'RECTANGLE' && 
@@ -155,17 +180,17 @@ function adjustChildrenConstraints(
       frameChild.layoutMode = 'VERTICAL';
       frameChild.primaryAxisSizingMode = 'AUTO'; // Hug Contents Vertically
       frameChild.counterAxisSizingMode = 'FIXED'; // FILL is not valid, use FIXED instead
-      
+
       // Resize to parent width to achieve "fill container" behavior
       frameChild.resize(newWidth, frameChild.height);
-    } else if ('constraints' in child) {
+    } else if (supportsConstraints(child)) { // Use type guard here
       // Keep original constraint logic for non-FrameNode children
       // Handle different constraint types
       if (child.constraints.horizontal === 'STRETCH') {
         // Stretch constraint - adjust width proportionally
         const widthRatio = child.width / originalWidth;
         // Check if the child is resizable before attempting to resize
-        if ('resize' in child) { 
+        if ('resize' in child) {
           child.resize(newWidth * widthRatio, child.height);
         }
       } else if (child.constraints.horizontal === 'CENTER') {
