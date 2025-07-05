@@ -1,40 +1,145 @@
-Below are the steps to get your plugin running. You can also find instructions at:
+# Make It Responsive - Figma Plugin with Google Authentication
 
-  https://www.figma.com/plugin-docs/plugin-quickstart-guide/
+A Figma plugin that helps designers create responsive layouts with Google authentication and user management via Supabase.
 
-This plugin template uses Typescript and NPM, two standard tools in creating JavaScript applications.
+## Features
 
-First, download Node.js which comes with NPM. This will allow you to install TypeScript and other
-libraries. You can find the download link here:
+- 🔐 Google OAuth authentication
+- 👤 User profile management
+- 📊 Usage tracking
+- 💎 Subscription management
+- 🎨 Responsive design tools
+- 📱 Cross-device layout optimization
 
-  https://nodejs.org/en/download/
+## Setup Instructions
 
-Next, install TypeScript using the command:
+### 1. Supabase Setup
 
-  npm install -g typescript
+1. Create a new Supabase project at [supabase.com](https://supabase.com)
+2. Go to Settings > API to get your project URL and anon key
+3. Go to Authentication > Providers and enable Google OAuth:
+   - Add your Google OAuth client ID and secret
+   - Set the redirect URL to: `https://your-project.supabase.co/auth/v1/callback`
 
-Finally, in the directory of your plugin, get the latest type definitions for the plugin API by running:
+### 2. Google OAuth Setup
 
-  npm install --save-dev @figma/plugin-typings
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project or select existing one
+3. Enable the Google+ API
+4. Go to Credentials > Create Credentials > OAuth 2.0 Client ID
+5. Set application type to "Web application"
+6. Add authorized redirect URIs:
+   - `https://your-project.supabase.co/auth/v1/callback`
+   - `http://localhost:3000/auth/callback` (for development)
 
-If you are familiar with JavaScript, TypeScript will look very familiar. In fact, valid JavaScript code
-is already valid Typescript code.
+### 3. Environment Variables
 
-TypeScript adds type annotations to variables. This allows code editors such as Visual Studio Code
-to provide information about the Figma API while you are writing code, as well as help catch bugs
-you previously didn't notice.
+Create a `.env` file in the root directory:
 
-For more information, visit https://www.typescriptlang.org/
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
 
-Using TypeScript requires a compiler to convert TypeScript (code.ts) into JavaScript (code.js)
-for the browser to run.
+### 4. Database Migration
 
-We recommend writing TypeScript code using Visual Studio code:
+Run the migration to create the user profiles table:
 
-1. Download Visual Studio Code if you haven't already: https://code.visualstudio.com/.
-2. Open this directory in Visual Studio Code.
-3. Compile TypeScript to JavaScript: Run the "Terminal > Run Build Task..." menu item,
-    then select "npm: watch". You will have to do this again every time
-    you reopen Visual Studio Code.
+```bash
+# If using Supabase CLI
+supabase db push
 
-That's it! Visual Studio Code will regenerate the JavaScript file every time you save.
+# Or copy the SQL from supabase/migrations/create_user_profiles.sql
+# and run it in your Supabase SQL editor
+```
+
+### 5. Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+### 6. Figma Plugin Setup
+
+1. Open Figma
+2. Go to Plugins > Development > Import plugin from manifest
+3. Select the `manifest.json` file from this project
+4. The plugin will appear in your plugins list
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── AuthProvider.tsx      # Authentication context
+│   ├── AuthButton.tsx        # Sign in/out button
+│   ├── AuthCallback.tsx      # OAuth callback handler
+│   ├── ProtectedFeature.tsx  # Feature access control
+│   └── AuthenticatedApp.tsx  # Main app component
+├── hooks/
+│   └── useUserProfile.ts     # User profile management
+├── lib/
+│   └── supabase.ts          # Supabase client setup
+├── styles/
+│   └── auth.css             # Authentication styles
+├── utils/
+│   └── figmaAuth.ts         # Figma-specific auth utilities
+└── main.tsx                 # App entry point
+```
+
+## Authentication Flow
+
+1. User clicks "Continue with Google"
+2. Redirected to Google OAuth consent screen
+3. After approval, redirected back to Supabase
+4. Supabase creates/updates user record
+5. Database trigger creates user profile
+6. User is signed in and can use the plugin
+
+## User Management
+
+- **User Profiles**: Stored in `user_profiles` table
+- **Usage Tracking**: Automatic increment on feature use
+- **Subscription Management**: Support for free/trial/premium tiers
+- **Session Persistence**: Sessions stored in Figma's client storage
+
+## Security Features
+
+- Row Level Security (RLS) enabled
+- User can only access their own data
+- Service role for admin operations
+- Secure token handling
+
+## Subscription Tiers
+
+- **Free**: Limited usage
+- **Trial**: Extended trial period
+- **Premium**: Full access to all features
+- **Expired**: Subscription ended
+
+## API Functions
+
+- `handle_new_user()`: Auto-create profile on signup
+- `increment_usage_count()`: Track feature usage
+- `check_subscription_status()`: Validate subscription
+- `update_user_profile()`: Update profile data
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
