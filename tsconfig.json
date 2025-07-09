@@ -19,7 +19,8 @@
     "code.ts",
     "code-with-auth.ts",
     "global.d.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    "server/**/*"
   ],
   "exclude": [
     "node_modules",
