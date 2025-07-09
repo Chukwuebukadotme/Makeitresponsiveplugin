@@ -2,59 +2,15 @@
 
 // This plugin adjusts frame widths and creates responsive breakpoints
 
-// Add this at the top of code.ts after the initial imports
-/*
-const AUTHORIZED_EMAILS = [
-  // Add your authorized email addresses here
-  'saveek4@gmail.com',
-  'mail@ajithvtom.in',
-  'frankgong99@gmail.com',
-  'makeitresponsive.co@gmail.com'
-];
-
-console.log('AUTHORIZED_EMAILS:', AUTHORIZED_EMAILS);
-
-// Use this function instead of includes
-function isAuthorizedEmail(email: string): boolean {
-  for (let i = 0; i < AUTHORIZED_EMAILS.length; i++) {
-    if (AUTHORIZED_EMAILS[i].toLowerCase() === email.toLowerCase()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// Add this function to check if user is authorized
-async function checkUserAuthorization() {
-  return new Promise<boolean>((resolve) => {
-    figma.clientStorage.getAsync('authorized-user').then(storedAuth => {
-      if (storedAuth && storedAuth.paid) {
-        // User was previously authorized and has paid
-        resolve(true);
-        return;
-      }
-      // ... shows verification UI if not authorized ...
-    });
-  });
-}
-
-// Update verification function
-async function verifyPaymentAndEmail(email: string): Promise<boolean> {
-  // Here you would typically make an API call to your backend to verify the payment
-  // For now, we'll just check if the email is in the authorized list
-  return isAuthorizedEmail(email);
-}
-
-// Add at the top of code.ts after AUTHORIZED_EMAILS
-const CHECKOUT_URL = "https://makeitresponsive.lemonsqueezy.com/buy/2957e621-c96b-4da9-8000-55cb59cca173?discount=0";
-
-// Add these constants
-const MAX_FREE_USES = 5;
-const USAGE_STORAGE_KEY = 'plugin-usage-count';
-*/
+// Import the enhanced responsive engine
+import { ResponsiveEngine, ResponsiveEngineOptions } from './src/utils/ResponsiveEngine'
+import { DesignAnalyzer } from './src/core/DesignAnalyzer'
 
 // Show UI - This line needs to be outside the comments
 figma.showUI(__html__, { width: 400, height: 600 });
+
+// Initialize the responsive engine
+const responsiveEngine = new ResponsiveEngine()
 
 // Store selected breakpoint frames
 const selectedBreakpoints: {
@@ -663,6 +619,228 @@ function serializeSelectedFrameToJSON(): string | null {
 // End of AI-Powered Layout Generation - Phase 1: Serialization
 // -----------------------------------------------------------------------------
 
+// Enhanced responsive generation function
+async function generateResponsiveVariants() {
+  const selection = figma.currentPage.selection
+  
+  if (selection.length === 0) {
+    figma.notify('Please select a frame to make responsive')
+    return
+  }
+  
+  if (selection.length > 1) {
+    figma.notify('Please select only one frame')
+    return
+  }
+  
+  const selectedNode = selection[0]
+  
+  if (selectedNode.type !== 'FRAME' && selectedNode.type !== 'COMPONENT' && selectedNode.type !== 'INSTANCE') {
+    figma.notify('Please select a frame, component, or instance')
+    return
+  }
+  
+  const sourceFrame = selectedNode as FrameNode
+  
+  try {
+    figma.notify('🔄 Analyzing design and generating responsive variants...', { timeout: 2000 })
+    
+    // Configure responsive engine options
+    const options: ResponsiveEngineOptions = {
+      breakpoints: {
+        desktop: Math.max(1200, sourceFrame.width),
+        tablet: Math.max(768, Math.min(sourceFrame.width * 0.75, 1024)),
+        mobile: Math.max(320, Math.min(sourceFrame.width * 0.4, 480))
+      },
+      uploadOptions: {
+        spacing: 100,
+        naming: {
+          prefix: sourceFrame.name + ' - Responsive',
+          includeBreakpoint: true,
+          includeDimensions: true
+        },
+        organization: 'horizontal',
+        createPage: false
+      },
+      generateReport: true,
+      preserveOriginal: true
+    }
+    
+    // Process the design
+    const result = await responsiveEngine.processDesign(sourceFrame, options)
+    
+    if (result.uploadResult.success) {
+      const variantCount = result.uploadResult.frameIds.length
+      figma.notify(`✅ Successfully created ${variantCount} responsive variants!`, { timeout: 3000 })
+      
+      // Log the report for debugging
+      if (result.report) {
+        console.log('Responsive Design Report:', result.report)
+      }
+      
+      // Show warnings if any
+      if (result.uploadResult.warnings.length > 0) {
+        console.warn('Warnings:', result.uploadResult.warnings)
+      }
+    } else {
+      figma.notify(`❌ Failed to create responsive variants: ${result.uploadResult.errors.join(', ')}`, { timeout: 5000 })
+    }
+    
+  } catch (error) {
+    console.error('Error generating responsive variants:', error)
+    figma.notify(`❌ Error: ${error.message}`, { timeout: 5000 })
+  }
+}
+
+// Enhanced frame width adjustment with intelligent scaling
+async function adjustFrameWidthIntelligent(targetWidth: number) {
+  try {
+    const selection = figma.currentPage.selection
+    
+    if (selection.length === 0) {
+      figma.notify('Please select a frame to resize')
+      return
+    }
+
+    for (const node of selection) {
+      if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
+        const sourceFrame = node as FrameNode
+        
+        // Use the design analyzer to understand the layout
+        const analyzer = new DesignAnalyzer()
+        const serializedDesign = serializeSelectedFrameToJSON()
+        
+        if (serializedDesign) {
+          const parsedDesign = JSON.parse(serializedDesign)
+          const layoutStructure = analyzer.analyzeDesign(parsedDesign)
+          
+          // Apply intelligent resizing based on analysis
+          await applyIntelligentResize(sourceFrame, targetWidth, layoutStructure)
+        } else {
+          // Fallback to original method
+          await adjustFrameWidth(targetWidth)
+        }
+      } else {
+        figma.notify('Please select a frame, component, or instance')
+      }
+    }
+  } catch (error) {
+    console.error('Error in intelligent frame adjustment:', error)
+    figma.notify(`Error adjusting frame: ${error.message}`, { timeout: 3000 })
+  }
+}
+
+// Apply intelligent resizing based on design analysis
+async function applyIntelligentResize(
+  frame: FrameNode, 
+  targetWidth: number, 
+  layoutStructure: any
+) {
+  const originalWidth = frame.width
+  const scaleFactor = targetWidth / originalWidth
+  
+  // Resize the main frame
+  frame.resize(targetWidth, frame.height)
+  
+  // Apply intelligent scaling to children based on their classification
+  if ('children' in frame) {
+    for (const child of frame.children) {
+      await applyIntelligentChildResize(child, scaleFactor, layoutStructure, targetWidth)
+    }
+  }
+}
+
+// Intelligent child resizing based on element type and importance
+async function applyIntelligentChildResize(
+  child: SceneNode,
+  scaleFactor: number,
+  layoutStructure: any,
+  containerWidth: number
+) {
+  // Find the element in the layout structure
+  const element = layoutStructure.hierarchy?.find((e: any) => e.id === child.id)
+  
+  if (!element) {
+    // Fallback to proportional scaling
+    if ('resize' in child) {
+      child.resize(child.width * scaleFactor, child.height)
+    }
+    return
+  }
+  
+  // Apply scaling based on element type and flexibility
+  switch (element.type) {
+    case 'text':
+      // Text elements: maintain readability
+      if (child.type === 'TEXT') {
+        const minWidth = Math.max(200, containerWidth * 0.3)
+        const newWidth = Math.max(minWidth, child.width * scaleFactor)
+        if ('resize' in child) {
+          child.resize(newWidth, child.height)
+        }
+      }
+      break
+      
+    case 'image':
+      // Images: preserve aspect ratio
+      if (element.constraints?.preserveProportions && element.constraints?.aspectRatio) {
+        const maxWidth = containerWidth * 0.9
+        const newWidth = Math.min(maxWidth, child.width * scaleFactor)
+        const newHeight = newWidth / element.constraints.aspectRatio
+        if ('resize' in child) {
+          child.resize(newWidth, newHeight)
+        }
+      }
+      break
+      
+    case 'button':
+      // Buttons: ensure touch-friendly sizing
+      const minButtonWidth = containerWidth < 768 ? 120 : 100
+      const maxButtonWidth = containerWidth * 0.8
+      const newButtonWidth = Math.max(minButtonWidth, Math.min(maxButtonWidth, child.width * scaleFactor))
+      const minButtonHeight = containerWidth < 768 ? 44 : 36
+      const newButtonHeight = Math.max(minButtonHeight, child.height)
+      if ('resize' in child) {
+        child.resize(newButtonWidth, newButtonHeight)
+      }
+      break
+      
+    case 'container':
+      // Containers: flexible scaling with padding adjustments
+      if (element.flexibility === 'flexible') {
+        const padding = containerWidth < 768 ? 16 : containerWidth < 1024 ? 24 : 32
+        const newWidth = containerWidth - (padding * 2)
+        if ('resize' in child) {
+          child.resize(newWidth, child.height)
+        }
+        
+        // Adjust auto layout padding if applicable
+        if (child.type === 'FRAME' && (child as FrameNode).layoutMode !== 'NONE') {
+          const frameChild = child as FrameNode
+          const paddingScale = containerWidth < 768 ? 0.6 : containerWidth < 1024 ? 0.8 : 1.0
+          frameChild.paddingLeft *= paddingScale
+          frameChild.paddingRight *= paddingScale
+          frameChild.paddingTop *= paddingScale
+          frameChild.paddingBottom *= paddingScale
+        }
+      }
+      break
+      
+    default:
+      // Default: proportional scaling
+      if ('resize' in child) {
+        child.resize(child.width * scaleFactor, child.height)
+      }
+  }
+  
+  // Recursively handle nested children
+  if ('children' in child) {
+    for (const grandchild of (child as any).children) {
+      await applyIntelligentChildResize(grandchild, scaleFactor, layoutStructure, containerWidth)
+    }
+  }
+}
+
 // Unified message handler
 figma.ui.onmessage = async (msg: { 
   type: string; 
@@ -671,7 +849,7 @@ figma.ui.onmessage = async (msg: {
   email?: string;
 }) => {
   if (msg.type === 'adjust-width' && typeof msg.width === 'number') {
-    await adjustFrameWidth(msg.width);
+    await adjustFrameWidthIntelligent(msg.width);
     figma.notify(`${msg.width}px generated`, { timeout: 2000 });
   }
   
@@ -689,6 +867,10 @@ figma.ui.onmessage = async (msg: {
   
   if (msg.type === 'check-selection') {
     checkSelection();
+  }
+  
+  if (msg.type === 'generate-responsive-variants') {
+    await generateResponsiveVariants();
   }
   
   if (msg.type === 'close') {
