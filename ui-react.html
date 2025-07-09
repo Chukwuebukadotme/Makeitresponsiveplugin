@@ -425,6 +425,11 @@
         userProfile = msg.profile;
         render();
       }
+      
+      if (msg.type === 'open-auth-url') {
+        // Open the OAuth URL in a new window/tab
+        window.open(msg.url, '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+      }
     });
 
     // Initial render

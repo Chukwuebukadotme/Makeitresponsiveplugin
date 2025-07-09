@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// For Figma plugins, we'll use placeholder values that should be replaced
+// with actual values when the plugin is deployed
+const supabaseUrl = 'https://roiltuqkzxugjfzkectn.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvaWx0dXFrenh1Z2pmemtlY3RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjIwMzksImV4cCI6MjA2NzI5ODAzOX0.NS89-a03z1Eem1lc_nfWMK2O8dkRkN3OD5hmhuOVlH4'
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+// In a real deployment, these would be replaced with actual values
+console.warn('Using placeholder Supabase credentials. Please update with real values in src/lib/supabase.ts')
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

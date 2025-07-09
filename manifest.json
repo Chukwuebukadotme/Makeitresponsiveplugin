@@ -2,7 +2,7 @@
   "name": "Make It Responsive",
   "id": "1462198874109313248",
   "api": "1.0.0",
-  "main": "code-with-auth.js",
+  "main": "code-bundled.js",
   "capabilities": [],
   "enableProposedApi": false,
   "documentAccess": "dynamic-page",

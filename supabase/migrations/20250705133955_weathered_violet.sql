@@ -1,37 +1,18 @@
 /*
-  # Create user profiles table
+  # User Profiles Table for Google Authentication
 
-  1. New Tables
-    - `user_profiles`
-      - `id` (uuid, primary key, references auth.users)
-      - `email` (text)
-      - `full_name` (text)
-      - `avatar_url` (text)
-      - `provider` (text)
-      - `created_at` (timestamp)
-      - `updated_at` (timestamp)
-      - `last_sign_in_at` (timestamp)
-      - `plugin_usage_count` (integer, default 0)
-      - `subscription_status` (text, default 'free')
-      - `subscription_expires_at` (timestamp)
-
-  2. Security
-    - Enable RLS on `user_profiles` table
-    - Add policies for users to read and update their own profile
-    - Add policy for service role to manage all profiles
-
-  3. Functions
-    - Create function to handle new user registration
-    - Create trigger to automatically create profile on user signup
+  - Stores user profile info after Google OAuth signup.
+  - Linked to Supabase's auth.users table (id = user's UUID).
+  - Populates fields from Google profile data.
 */
 
--- Create user_profiles table
+-- 1. Create user_profiles table
 CREATE TABLE IF NOT EXISTS user_profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email text UNIQUE NOT NULL,
   full_name text,
   avatar_url text,
-  provider text DEFAULT 'google',
+  provider text DEFAULT 'google', -- Always 'google' for Google OAuth
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
   last_sign_in_at timestamptz DEFAULT now(),
@@ -41,10 +22,10 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   metadata jsonb DEFAULT '{}'::jsonb
 );
 
--- Enable RLS
+-- 2. Enable Row Level Security
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
--- Create policies
+-- 3. Policies
 CREATE POLICY "Users can read own profile"
   ON user_profiles
   FOR SELECT
@@ -65,8 +46,8 @@ CREATE POLICY "Service role can manage all profiles"
   USING (true)
   WITH CHECK (true);
 
--- Create function to handle new user registration
-CREATE OR REPLACE FUNCTION handle_new_user()
+-- 4. Function: Create or update profile on new Google user signup
+CREATE OR REPLACE FUNCTION handle_new_google_user()
 RETURNS trigger AS $$
 BEGIN
   INSERT INTO user_profiles (
@@ -84,7 +65,7 @@ BEGIN
     NEW.email,
     NEW.raw_user_meta_data->>'full_name',
     NEW.raw_user_meta_data->>'avatar_url',
-    COALESCE(NEW.raw_app_meta_data->>'provider', 'google'),
+    'google', -- Always set provider to 'google'
     NOW(),
     NOW(),
     NOW()
@@ -95,16 +76,19 @@ BEGIN
     avatar_url = EXCLUDED.avatar_url,
     last_sign_in_at = NOW(),
     updated_at = NOW();
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create trigger for new user registration
+-- 5. Trigger: Run function after new user is created in auth.users
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT OR UPDATE ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+  FOR EACH ROW EXECUTE FUNCTION handle_new_google_user();
+
+-- 6. (Optional) Other helper functions (unchanged)
+-- update_user_profile, increment_usage_count, check_subscription_status
 
 -- Create function to update user profile
 CREATE OR REPLACE FUNCTION update_user_profile(
