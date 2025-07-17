@@ -67,3 +67,12 @@ interface ChildrenMixin {
 }
 
 declare const __html__: string; 
+
+declare namespace NodeJS {
+  interface ProcessEnv {
+    PORT?: string;
+    VITE_SUPABASE_URL?: string;
+    VITE_SUPABASE_ANON_KEY?: string;
+    NODE_ENV?: 'development' | 'production' | 'test';
+  }
+} 
