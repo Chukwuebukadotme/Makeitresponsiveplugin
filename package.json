@@ -1,35 +1,40 @@
 {
-  "name": "figma-frame-width-adjustment",
+  "name": "minimal-figma-plugin",
   "version": "1.0.0",
-  "description": "Adjusts frame widths to match screen width",
+  "description": "A minimal Figma plugin that resizes frames.",
   "main": "code.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "watch": "tsc -p tsconfig.json -w",
-    "dev": "vite",
-    "build-ui": "vite build",
-    "preview": "vite preview",
-    "start-server": "node dist/server/index.js",
-    "dev-server": "tsc && node dist/server/index.js",
-    "build-server": "tsc -p tsconfig.json"
+    "build": "tsc",
+    "watch": "tsc -w"
   },
-  "author": "",
-  "license": "MIT",
   "devDependencies": {
-    "@figma/plugin-typings": "^1.107.0-beta.2",
-    "@types/node": "^22.13.1",
-    "@types/stripe": "^8.0.416",
     "typescript": "^5.0.0",
-    "undici-types": "^7.3.0"
+    "@figma/plugin-typings": "^1.107.0-beta.2",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@figma/eslint-plugin-figma-plugins": "^1.0.0"
   },
-  "dependencies": {
-    "@supabase/auth-ui-react": "^0.4.7",
-    "@supabase/auth-ui-shared": "^0.1.8",
-    "@supabase/supabase-js": "^2.50.3",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^4.17.23",
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "stripe": "^17.6.0"
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:@figma/figma-plugins/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "root": true,
+    "rules": {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }
+      ]
+    }
   }
-}
+} 

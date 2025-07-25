@@ -1,56 +1,6 @@
 /// <reference types="@figma/plugin-typings" />
 // This plugin adjusts frame widths and creates responsive breakpoints
-// Add this at the top of code.ts after the initial imports
-/*
-const AUTHORIZED_EMAILS = [
-  // Add your authorized email addresses here
-  'saveek4@gmail.com',
-  'mail@ajithvtom.in',
-  'frankgong99@gmail.com',
-  'makeitresponsive.co@gmail.com'
-];
 
-console.log('AUTHORIZED_EMAILS:', AUTHORIZED_EMAILS);
-
-// Use this function instead of includes
-function isAuthorizedEmail(email: string): boolean {
-  for (let i = 0; i < AUTHORIZED_EMAILS.length; i++) {
-    if (AUTHORIZED_EMAILS[i].toLowerCase() === email.toLowerCase()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// Add this function to check if user is authorized
-async function checkUserAuthorization() {
-  return new Promise<boolean>((resolve) => {
-    figma.clientStorage.getAsync('authorized-user').then(storedAuth => {
-      if (storedAuth && storedAuth.paid) {
-        // User was previously authorized and has paid
-        resolve(true);
-        return;
-      }
-      // ... shows verification UI if not authorized ...
-    });
-  });
-}
-
-// Update verification function
-async function verifyPaymentAndEmail(email: string): Promise<boolean> {
-  // Here you would typically make an API call to your backend to verify the payment
-  // For now, we'll just check if the email is in the authorized list
-  return isAuthorizedEmail(email);
-}
-
-// Add at the top of code.ts after AUTHORIZED_EMAILS
-const CHECKOUT_URL = "https://makeitresponsive.lemonsqueezy.com/buy/2957e621-c96b-4da9-8000-55cb59cca173?discount=0";
-
-// Add these constants
-const MAX_FREE_USES = 5;
-const USAGE_STORAGE_KEY = 'plugin-usage-count';
-*/
-// Show UI - This line needs to be outside the comments
 figma.showUI(__html__, { width: 400, height: 600 });
 // Store selected breakpoint frames
 const selectedBreakpoints = {

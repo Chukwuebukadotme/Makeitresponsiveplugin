@@ -1,29 +1,20 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "lib": ["ES6", "DOM", "ES2017", "ES2020"],
     "module": "CommonJS",
-    "typeRoots": ["./node_modules/@figma/plugin-typings"],
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "strict": false,
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
+    "lib": ["ES6", "DOM"],
     "outDir": "./dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@figma/plugin-typings"]
   },
   "include": [
-    "src",
-    "code.ts",
-    "code-with-auth.ts",
-    "global.d.ts",
-    "vite.config.ts",
-    "server/**/*"
+    "code.ts"
   ],
   "exclude": [
     "node_modules",
     "dist"
   ]
-}
+} 
